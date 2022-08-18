@@ -16,12 +16,40 @@ from dotenv import load_dotenv
 GITHUB_API_URL = "https://api.github.com"
 
 
-def create_repository(repository_name: str,
-                      username: str,
-                      token: str,
-                      path: str,
-                      public: bool = False):
+def validate_check_username_and_token(username: str, token: str):
     """
+
+    Args:
+        username (str):
+        token (str):
+
+    Raises:
+        SystemExit: on any GitHub API request errors
+
+    Returns:
+        _type_: true when username matches token login
+    """
+    headers = {
+        "Authorization": f"token {token}",
+        "Accept": "application/vnd.GitHub+json"
+    }
+    try:
+        response = requests.get(url=f"{GITHUB_API_URL}/user", headers=headers)
+        response.raise_for_status()
+        if response.json()["login"] == username:
+            return True
+        else:
+            print("Given token does not match username!")
+    except requests.exceptions.RequestException as exc:
+        raise SystemExit(exc) from exc
+
+
+def init_repository(repository_name: str,
+                    username: str,
+                    token: str,
+                    path: str,
+                    public: bool = False):
+    """initializes repo on GitHub of given user
 
     Args:
         repository_name (str):
@@ -33,7 +61,11 @@ def create_repository(repository_name: str,
     Raises:
         SystemExit: on any GitHub API request errors
     """
-    payload = {"name": repository_name, "private": not public}
+    payload = {
+        "name": repository_name,
+        "private": not public,
+        "auto_init": True
+    }
     headers = {
         "Authorization": f"token {token}",
         "Accept": "application/vnd.GitHub+json"
@@ -51,13 +83,15 @@ def create_repository(repository_name: str,
                                  headers=headers)
         response.raise_for_status()
     except requests.exceptions.RequestException as exc:
-        raise SystemExit(exc) from requests.exceptions.RequestException
-    initialize_repository(username=username,
-                          path=path,
-                          repository_name=repository_name)
+        raise SystemExit(exc) from exc
+    clone_repository(username=username,
+                     path=path,
+                     repository_name=repository_name,
+                     token=token)
 
 
-def initialize_repository(username: str, path: str, repository_name: str):
+def clone_repository(username: str, path: str, repository_name: str,
+                     token: str):
     """
 
     Args:
@@ -74,18 +108,11 @@ def initialize_repository(username: str, path: str, repository_name: str):
             os.makedirs(path, exist_ok=True)
             print(f"Created directory {path}")
         os.chdir(path)
-        os.mkdir(repository_name)
-        os.chdir(f"{path}/{repository_name}")
-        os.system("git init")
         os.system(
-            f"git remote add origin https://github.com/{username}/{repository_name}.git"
-        )
-        os.system(f"echo '# {repository_name}' >> README.md")
-        os.system(
-            "git add . && git commit -m 'Initial Commit' && git push origin master"
+            f"git clone https://{username}:{token}@github.com/{username}/{repository_name}.git"
         )
     except FileExistsError as exc:
-        raise SystemExit(exc) from FileExistsError
+        raise SystemExit(exc) from exc
 
 
 def main():
@@ -136,20 +163,24 @@ def main():
         print(
             "Missing username argument. Store your username in .env USERNAME or pass it as \"-u\" "
             "argument, when running this script.")
+        return
     if not token:
         print(
             "Missing GitHub token argument. Store your token in .env TOKEN or pass it as \"-t\" "
             "argument, when running this script.")
+        return
     if not path:
         print(
             "Missing path argument. Store your base path for the new repositories to created in "
             ".env PATH or pass it as \"-p\" argument, when running this script."
         )
-    create_repository(repository_name=args.repository_name,
-                      username=username,
-                      token=token,
-                      path=path,
-                      public=args.is_public)
+        return
+    validate_check_username_and_token(username=username, token=token)
+    init_repository(repository_name=args.repository_name,
+                    username=username,
+                    token=token,
+                    path=path,
+                    public=args.is_public)
 
 
 if __name__ == "__main__":
