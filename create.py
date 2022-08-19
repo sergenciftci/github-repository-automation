@@ -1,7 +1,7 @@
-""" a simple python module to initialize a repository on GitHub and your local machine
+""" a simple python module to initialize a repository on GitHub and clone it to your local machine
 
 Raises:
-    FileExistsError: _description_
+    FileExistsError: when the repository already exists either on Github or on your local machine
     SystemExit: on any GitHub API request errors
     SystemExit: when another directory with the same name as the created repository already exists
 """
@@ -16,18 +16,18 @@ from dotenv import load_dotenv
 GITHUB_API_URL = "https://api.github.com"
 
 
-def validate_check_username_and_token(username: str, token: str):
+def validate_username_and_token(username: str, token: str):
     """
 
     Args:
-        username (str):
-        token (str):
+        username (str): GitHub username
+        token (str): GitHub token
 
     Raises:
         SystemExit: on any GitHub API request errors
 
     Returns:
-        _type_: true when username matches token login
+        _type_: true when username matches login token
     """
     headers = {
         "Authorization": f"token {token}",
@@ -49,7 +49,7 @@ def init_repository(repository_name: str,
                     token: str,
                     path: str,
                     public: bool = False):
-    """initializes repo on GitHub of given user
+    """initializes repository on GitHub
 
     Args:
         repository_name (str):
@@ -175,7 +175,7 @@ def main():
             ".env PATH or pass it as \"-p\" argument, when running this script."
         )
         return
-    validate_check_username_and_token(username=username, token=token)
+    validate_username_and_token(username=username, token=token)
     init_repository(repository_name=args.repository_name,
                     username=username,
                     token=token,
