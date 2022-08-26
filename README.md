@@ -10,7 +10,7 @@ chmod +x create.py
 ### Usage:
 ```bash
 cd ~/github-repository-automation
-./create.py -n <name of your repository>
+python create.py -n <name of your repository>
 ```
 You can store your username, GitHub access token and desired path in the `.env` file. These act as default arguments and can be overruled by passing them on script execution.
 ```bash
@@ -19,7 +19,7 @@ You can store your username, GitHub access token and desired path in the `.env` 
 Add the command with an alias to your `~/.bashrc`, if you don't want to navigate to the `<project base path>/github-repository-automation` directory to execute the command. 
 
 ```bash
-alias <mycoolscript>=".<project base path>/github-repository-automation/create.py" >> ~/.bashrc
+alias <mycoolscript>="python <project base path>/github-repository-automation/create.py" >> ~/.bashrc
 ```
 Now you can execute your command from anywhere.
 ```bash
