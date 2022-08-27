@@ -148,11 +148,11 @@ def main():
     args = parser.parse_args()
     load_dotenv()
     if args.username is None:
-        username = os.environ.get("USERNAME")
+        username = os.environ.get("GITHUB_USERNAME")
     else:
         username = args.username
     if args.token is None:
-        token = os.environ.get("TOKEN")
+        token = os.environ.get("GITHUB_TOKEN")
     else:
         token = args.token
     if args.path is None:
